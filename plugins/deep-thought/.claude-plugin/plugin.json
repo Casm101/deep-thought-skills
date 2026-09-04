@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin.json",
+  "name": "deep-thought",
+  "description": "Christian's personal dt-* workflow suite for Claude Code. One flow runs from a branch to an open PR (dt-create-branch, dt-investigation, dt-grilling, dt-to-tasks, dt-tdd-prep, dt-implement, dt-ship, dt-pr-data), with review skills guarding it (dt-code-review, dt-overkill-code-review, dt-pr-review, dt-pr-defense), branch surgery beside it (dt-branch-update, dt-merge-conflicts, dt-inherit-branch, dt-handoff), sportsbook-ui specialists (dt-storybook-creator, dt-tailwind-migration-tool, dt-test-account, dt-pr-slack-message, dt-ticket-refiner), writing gates underneath (dt-unslop, dt-unslop-code), an unattended runner (dt-auto-develop), and two skills that maintain the suite itself (dt-skill-creator, dt-auto-improve-skill). Ask dt-ask-deepthought which one fits.",
+  "author": {
+    "name": "Christian Smith Mantas"
+  },
+  "homepage": "https://github.com/Casm101/deep-thought-skills",
+  "repository": "https://github.com/Casm101/deep-thought-skills",
+  "license": "UNLICENSED"
+}

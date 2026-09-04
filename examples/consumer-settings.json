@@ -1,0 +1,9 @@
+{
+  "extraKnownMarketplaces": {
+    "deep-thought-skills": {
+      "source": { "source": "github", "repo": "Casm101/deep-thought-skills" },
+      "autoUpdate": true
+    }
+  },
+  "enabledPlugins": { "deep-thought@deep-thought-skills": true }
+}

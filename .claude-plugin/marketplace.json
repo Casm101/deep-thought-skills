@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "deep-thought-skills",
+  "description": "Christian's personal dt-* workflow skills for Claude Code, packaged as a plugin so every machine runs the same set.",
+  "owner": {
+    "name": "Christian Smith Mantas"
+  },
+  "plugins": [
+    {
+      "name": "deep-thought",
+      "description": "The dt-* workflow suite: one flow from branch to open PR (create-branch, investigation, grilling, to-tasks, tdd-prep, implement, ship, pr-data), the review skills that guard it (code-review, overkill-code-review, pr-review, pr-defense), branch surgery (branch-update, merge-conflicts, inherit-branch, handoff), the sportsbook-ui specialists (storybook-creator, tailwind-migration-tool, test-account, pr-slack-message, ticket-refiner), the writing gates (unslop, unslop-code), an unattended runner (auto-develop), and the two skills that maintain the suite itself (skill-creator, auto-improve-skill). dt-ask-deepthought routes between them.",
+      "author": {
+        "name": "Christian Smith Mantas"
+      },
+      "source": "./plugins/deep-thought"
+    }
+  ]
+}
