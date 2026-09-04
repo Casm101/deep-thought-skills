@@ -79,8 +79,8 @@ This is the phase the skill exists for, and the one most likely to be skipped.
 
 **Collapse records into work items.** Four commits, a branch and a pull request that all carry
 TS-42160 are one piece of work, not six. Group by ticket key first, then by what the change was about
-where there is no key. A normal day collapses to between one and four items. Past about
-eight, the collapsing has not been done.
+where there is no key. A normal day collapses to between one and four items, and past about eight
+the collapsing has not been done.
 
 **Name the outcome, not the record.** A commit subject describes an edit; a work item describes what
 changed for someone. "Add Widget Name to cashout tracking events" becomes "cashout tracking now says
