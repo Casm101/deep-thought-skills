@@ -18,8 +18,8 @@ command -v gh >/dev/null 2>&1 || die "gh CLI not found. Install it (brew install
 gh auth status >/dev/null 2>&1 || die "gh is not authenticated. Run 'gh auth login'."
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || die "not inside a git repository."
 
-REPO=$(gh repo view --json nameWithOwner -q .nameWithOwner 2>/dev/null) \
-  || die "could not resolve the GitHub repo here (no 'origin' remote pointing at GitHub?)."
+HERE=$(gh repo view --json nameWithOwner -q .nameWithOwner 2>/dev/null || true)
+REPO="$HERE"   # a PR URL overrides this below; it names its own repo
 
 # ---- resolve the PR number -------------------------------------------------
 PR=""; SOURCE=""
@@ -31,8 +31,10 @@ case "$ARG" in
     PR=$(gh pr list --repo "$REPO" --head "$BRANCH" --state open --json number -q '.[0].number' 2>/dev/null)
     ;;
   *[!0-9]*)
-    if [[ "$ARG" =~ ^https?://.*/pull/([0-9]+) ]]; then
-      PR="${BASH_REMATCH[1]}"; SOURCE="URL"
+    if [[ "$ARG" =~ ^https?://[^/]+/([^/]+/[^/]+)/pull/([0-9]+) ]]; then
+      # Take owner/repo from the URL, never from the cwd. Taking only the number once fetched
+      # an unrelated PR with the same number from the repo the shell happened to be in.
+      REPO="${BASH_REMATCH[1]}"; PR="${BASH_REMATCH[2]}"; SOURCE="URL"
     else
       SOURCE="branch '$ARG'"
       MATCHES=$(gh pr list --repo "$REPO" --head "$ARG" --state open --json number -q '.[].number' 2>/dev/null)
@@ -43,6 +45,8 @@ case "$ARG" in
     ;;
   *) PR="$ARG"; SOURCE="PR number" ;;
 esac
+
+[ -n "$REPO" ] || die "could not resolve the GitHub repo here (no 'origin' remote pointing at GitHub?). Pass a PR URL to name it."
 
 if [ -z "${PR:-}" ]; then
   # No open PR: if the branch has a closed/merged one, name it so the user can decide.
@@ -58,6 +62,10 @@ if [ -z "${PR:-}" ]; then
 fi
 
 echo "=== PR CONTEXT ($REPO, resolved from $SOURCE) ==="
+if [ -n "$HERE" ] && [ "$HERE" != "$REPO" ]; then
+  echo "note:        this PR lives in $REPO but the checkout here is ${HERE}. The reviewing agents read the"
+  echo "             working tree, so check the PR out in a clone of $REPO, or fall back to a diff-only review."
+fi
 gh pr view "$PR" --repo "$REPO" \
   --json number,title,url,state,isDraft,author,baseRefName,headRefName,headRefOid,additions,deletions,changedFiles,labels,reviewDecision,mergeable,updatedAt,body \
   -q '"repo:        '"$REPO"'

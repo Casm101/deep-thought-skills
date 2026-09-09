@@ -41,6 +41,10 @@ gh pr view <n> --repo <owner>/<repo> --json headRefOid -q .headRefOid
 
 **They match.** Delegate straight away.
 
+**The PR is in another repository.** The resolver says so when a URL names a repo other than the one
+you are in. Run the steps below in a clone of that repository, not here; with no clone, it is a
+diff-only review.
+
 **They do not match, and the working tree is clean.** Check the PR out, review, then go back:
 
 ```bash
