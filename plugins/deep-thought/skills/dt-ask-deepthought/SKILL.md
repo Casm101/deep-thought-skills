@@ -56,6 +56,7 @@ STANDALONE
   dt-merge-conflicts  a merge, rebase or cherry-pick stopped on conflicts.
   dt-handoff       the session is ending and someone else continues.
   dt-work-summary  what got done over the last day or few, as prose and as short bullets.
+  dt-artifact-export  turn an artifact into one HTML file that opens with no network.
   dt-skill-creator builds a new dt skill. A person invokes it, never an agent.
   dt-ask-deepthought   this one.
 ```
@@ -94,6 +95,7 @@ reaching for those separately is only worth it when you want just that piece.
 | `dt-auto-improve-skill` | A run showed a skill should have known something | The lesson, and which skill | The skill edited to carry it, after you approve the diff |
 | `dt-handoff` | The session is ending, or context is running out, and the work continues elsewhere | The conversation | A handoff document in the temp directory |
 | `dt-work-summary` | You need to say what you have been working on, for a standup, a recap or a one to one | A number of days, defaulting to 1, and optionally one repo | A short summary and a flat list of bullets under fifteen words each, with nothing around them |
+| `dt-artifact-export` | An artifact needs sending to somebody who cannot open the link, or keeping as a file | An artifact URL or title, and it must be one the user owns | One HTML file in Downloads with every font, script and image folded in, proved by loading it |
 | `dt-skill-creator` | The user wants a new dt skill built | An idea for one | The skill installed, wired into this router, and printed for review |
 
 ## How to choose
@@ -145,14 +147,17 @@ at once.
 19. **Does the user want to say what they have been working on?** `dt-work-summary`. It reads
    git, GitHub and the tickets those name, covers their own work and nobody else's, defaults to
    the last day, and gives back a short summary and a list of bullets with nothing around them.
-20. **Is the deliverable words rather than code?** `dt-unslop`, on its own.
-21. **Is a change written and cluttered with comments?** `dt-unslop-code`. `dt-implement` already
+20. **Does an artifact need to become a file somebody can open?** `dt-artifact-export`. It folds
+   every font, script and image into one HTML file in Downloads, then loads it to prove nothing
+   still reaches the network. Only works on artifacts the user owns.
+21. **Is the deliverable words rather than code?** `dt-unslop`, on its own.
+22. **Is a change written and cluttered with comments?** `dt-unslop-code`. `dt-implement` already
     runs it, so reach for it separately only when the code was written outside that flow.
-22. **Does the user want a new dt skill?** `dt-skill-creator`. Only a person can invoke it, so say
+23. **Does the user want a new dt skill?** `dt-skill-creator`. Only a person can invoke it, so say
     that if an agent is the one asking.
-23. **Did a run just show a skill should have known something?** `dt-auto-improve-skill`. Most runs
+24. **Did a run just show a skill should have known something?** `dt-auto-improve-skill`. Most runs
    teach nothing, and saying so is the right answer.
-24. **None of the above.** Say so. See below.
+25. **None of the above.** Say so. See below.
 
 Two signals beat the list. If the user named a skill, they get that skill. If a phase inside a skill
 already running says to call another, that instruction wins over anything here.

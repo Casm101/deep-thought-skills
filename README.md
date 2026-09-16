@@ -67,6 +67,7 @@ commits; `dt-ship` is the only one that pushes or opens a PR.
 | **sportsbook-ui** | `dt-storybook-creator`, `dt-tailwind-migration-tool`, `dt-test-account`, `dt-pr-slack-message`, `dt-ticket-refiner` |
 | **Writing** | `dt-unslop` (all prose), `dt-unslop-code` (comments a change left behind) |
 | **Reporting** | `dt-work-summary` says what you got done over the last day or few, as prose then as short bullets |
+| **Artifacts** | `dt-artifact-export` turns a Claude artifact into one self-contained HTML file you can send anyone |
 | **Unattended** | `dt-auto-develop` runs the whole flow from a ticket and stops rather than guessing |
 | **The suite itself** | `dt-skill-creator` (new skills), `dt-auto-improve-skill` (fold a lesson back in) |
 
