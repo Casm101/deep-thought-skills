@@ -21,7 +21,8 @@ below, read whatever else in the repository helps you understand the change.
 Work in this order:
 
 1. Read the repository documentation listed in the packet. It sets the rules this change has to meet.
-2. Read the diff at the path given in the packet.
+2. Read the diff at the path given in the packet. If your file tool refuses that path, read it
+   from the shell with `cat`.
 3. Read the surrounding code for every changed file. The diff alone hides most problems.
 4. Check the change against the documentation, against the code around it, and against ordinary
    review practice.
