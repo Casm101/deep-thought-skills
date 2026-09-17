@@ -39,6 +39,10 @@ diff, every documentation file that governs the touched directories, and the tes
 type-check commands for the packages that own the changed files. Base defaults to `origin/HEAD`, then
 `origin/main`, then `main`.
 
+The diff lands in `${TMPDIR:-/tmp}`. A file reader fenced to the working folders, as in the Claude
+Code desktop app, cannot open it there, so set `TMPDIR` to a directory under an allowed folder and
+outside any repository before running the script.
+
 Everything between `----- PACKET BEGINS -----` and `----- PACKET ENDS -----` goes into the agent
 prompt unchanged.
 
