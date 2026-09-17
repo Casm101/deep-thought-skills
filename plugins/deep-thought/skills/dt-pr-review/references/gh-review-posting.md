@@ -15,7 +15,8 @@ Everything here runs **after** the user has approved the specific findings.
   `gh pr view <n> --json author -q .author.login` against `gh api user -q .login`.
 - **A comment must anchor to a line that is part of the diff** for the head commit, or the whole
   request is rejected (422, "line must be part of the diff"). If in doubt, anchor to a line you can
-  see with a `+` or a context marker in the hunk, or make it a file-level comment.
+  see with a `+` or a context marker in the hunk. A file-level comment cannot ride in this payload;
+  step 1 says what to do instead.
 - `side: "RIGHT"` is the default and numbers lines in the head version. Use it for added and context
   lines. `side: "LEFT"` numbers the base version, so use it only to comment on a removed line.
 - Omitting `event` leaves the review **pending** (a draft only you can see). Always pass `event`.
@@ -47,11 +48,6 @@ Write to the session scratchpad, not into the repo.
       "side": "RIGHT",
       "start_side": "RIGHT",
       "body": "nit: this walks the list twice; one `reduce` would do it.\nNon-blocking, no need to resolve."
-    },
-    {
-      "path": "src/features/bets/index.ts",
-      "subject_type": "file",
-      "body": "These new exports cross the package boundary that `docs/CONVENTIONS.md` sets out.\nRe-exporting from the package entry keeps it inside."
     }
   ]
 }
@@ -62,7 +58,11 @@ where the nit is one paragraph on two lines, and no em dash anywhere in any body
 
 - Single line: `path`, `line`, `side`, `body`.
 - Line range: add `start_line` and `start_side` (`start_line` < `line`).
-- Whole file: `subject_type: "file"` with no line fields.
+- Whole file: not in this payload. The reviews endpoint's draft comments have no `subject_type`, and
+  one in the list fails the whole call (422, `Field is not defined on DraftPullRequestReviewComment`).
+  Anchor a file-wide remark to the block the PR edited, or add it once the review exists with
+  `POST repos/<owner>/<repo>/pulls/<number>/comments`, `subject_type: "file"` and the head
+  `commit_id`, which costs the author a second notification.
 - Keep the summary `body` short: what you reviewed against, the counts, and nothing else. The
   detail belongs inline. When any finding is a nit, state in the summary that those are
   non-blocking, so the author knows the count they actually have to act on.
@@ -96,9 +96,9 @@ gh api --method POST "repos/<owner>/<repo>/pulls/<number>/reviews" \
   --input /path/to/review.json -q '{id, html_url, state}'
 ```
 
-If it fails with 422 on a line, fix that one comment's anchor (or convert it to `subject_type:
-"file"`) and retry the whole call. Do not fall back to posting the comments one by one. That spams
-the author with N notifications.
+If it fails with 422 on a line, fix that one comment's anchor and retry the whole call. A 422 naming
+`subjectType` means a file-level comment slipped into the payload; give it a line range. Do not fall
+back to posting the comments one by one. That spams the author with N notifications.
 
 ## 3. Add suggested fixes as threaded replies
 
