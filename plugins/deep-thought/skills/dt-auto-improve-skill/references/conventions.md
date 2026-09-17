@@ -69,7 +69,9 @@ a lesson never lands there.
 - `#!/usr/bin/env bash` and `set -uo pipefail`. Not `-e`, which turns a harmless failing test into an
   exit.
 - Read-only by default, printing to stdout. A temp file goes in `${TMPDIR:-/tmp}` and its path gets
-  printed, never inside the user's repo.
+  printed, never inside the user's repo. A file reader fenced to the working folders, as in the
+  Claude Code desktop app, cannot open that path, so a skill that hands the file to an agent says how
+  to redirect `TMPDIR` and how to read it from the shell instead.
 - Fail with a message naming the fix.
 - **Test against real data before shipping.** Every script in this suite had a bug that only appeared
   on a real repository.
