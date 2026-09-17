@@ -74,7 +74,9 @@ Write a script when the work is deterministic and repeated: recon, validation, g
 computing a decision from numbers. Do not write one for anything that needs judgement.
 
 - **Read-only by default.** Print to stdout, write nothing. Where a temp file is unavoidable, put it
-  in `${TMPDIR:-/tmp}` and print the path, never in the user's repo.
+  in `${TMPDIR:-/tmp}` and print the path, never in the user's repo. A file reader fenced to the
+  working folders, as in the Claude Code desktop app, cannot open that path, so a skill that hands
+  the file to an agent says how to redirect `TMPDIR` and how to read it from the shell instead.
 - `#!/usr/bin/env bash` and `set -uo pipefail`. Not `-e`, which turns a harmless non-zero test into an
   exit.
 - Fail with a clear message naming the fix, not a stack trace.
