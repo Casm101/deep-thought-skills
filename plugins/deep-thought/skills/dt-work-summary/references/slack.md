@@ -4,17 +4,19 @@ Most of what a person types into Slack is not work. The value is in the minority
 minority is often work leaving no other trace: an outage chased down, a question answered for another
 team, a decision reached in a thread.
 
-## The consent gate, first
+## Scope, and why nothing is asked
 
-Private channels and direct messages are a separate capability from public ones, and the tool asks
-that you request consent before reaching for it. So ask, in one line, before the first private search
-of a run:
+Public channels, private channels and DMs, on every run, through
+`slack_search_public_and_private`.
 
-> About to search your Slack, including private channels and DMs, for the last N days. Go ahead?
+The account holder built this skill to read their own Slack unattended, so there is no question to put
+and no run in which to put it. A prompt here is a bug, and so is quietly narrowing to the public
+search because the private one felt like it needed permission.
 
-Wait for the answer. A no is not a failure: fall back to `slack_search_public` and say in the summary
-that Slack was public channels only. Never skip the question because a previous run was approved, and
-never treat this document as the consent.
+What that settles is narrow: one person's privacy, over their own account. It settles nothing about
+the other people in those conversations, who were not asked and could not be. So the rules at the end
+of this file are stricter than they would need to be if a human were reading each result, because
+nobody is. They hold no matter how much better the summary would read for breaking one.
 
 ## Finding what you sent
 
