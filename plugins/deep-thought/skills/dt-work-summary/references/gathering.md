@@ -71,8 +71,12 @@ than the commit subject, which is what it is for here. Worklogs are out entirely
 **Claude Code session transcripts.** They record every attempt including the abandoned ones, so a day
 spent going in circles reads as a productive one.
 
-**Slack, Confluence and calendars.** Meetings and messages are not what this summary is for, and
-pulling them in makes it long enough that nobody reads it.
+**Confluence and calendars.** A meeting attended is not a thing built, and a page read is not a page
+written. Both make the summary long enough that nobody reads it.
+
+Slack used to sit in this list for the same reason. It came out because the reason was wrong: a day
+spent chasing an outage across three channels leaves no git trace at all, and excluding it reported
+that day as empty. It is now a source, with its own filter, in `references/slack.md`.
 
 **Datadog.** No credential is configured for it, and an incident someone looked at is not a change
 they made.

@@ -94,7 +94,7 @@ reaching for those separately is only worth it when you want just that piece.
 | `dt-unslop-code` | A change is written and left comments behind | The change | The unnecessary comments gone, the rest shortened to what the code cannot say |
 | `dt-auto-improve-skill` | A run showed a skill should have known something | The lesson, and which skill | The skill edited to carry it, after you approve the diff |
 | `dt-handoff` | The session is ending, or context is running out, and the work continues elsewhere | The conversation | A handoff document in the temp directory |
-| `dt-work-summary` | You need to say what you have been working on, for a standup, a recap or a one to one | A number of days, defaulting to 1, and optionally one repo | A short summary and a flat list of bullets under fifteen words each, with nothing around them |
+| `dt-work-summary` | You need to say what you have been working on, for a standup, a recap or a one to one | A number of days, defaulting to 1, and optionally one repo. Asks before reading private Slack | A short summary and a flat list of bullets under fifteen words each, with nothing around them |
 | `dt-artifact-export` | An artifact needs sending to somebody who cannot open the link, or keeping as a file | An artifact URL or title, and it must be one the user owns | One HTML file in Downloads with every font, script and image folded in, proved by loading it |
 | `dt-skill-creator` | The user wants a new dt skill built | An idea for one | The skill installed, wired into this router, and printed for review |
 
@@ -145,8 +145,9 @@ at once.
 18. **Is a staging test account needed?** `dt-test-account`. Staging only, and the backend picks the
    password rather than you.
 19. **Does the user want to say what they have been working on?** `dt-work-summary`. It reads
-   git, GitHub and the tickets those name, covers their own work and nobody else's, defaults to
-   the last day, and gives back a short summary and a list of bullets with nothing around them.
+   git, GitHub, Slack and the tickets those name, covers their own work and nobody else's, defaults
+   to the last day, and gives back a short summary and a list of bullets with nothing around them.
+   It asks before searching private Slack channels and DMs.
 20. **Does an artifact need to become a file somebody can open?** `dt-artifact-export`. It folds
    every font, script and image into one HTML file in Downloads, then loads it to prove nothing
    still reaches the network. Only works on artifacts the user owns.
