@@ -51,6 +51,7 @@ STANDALONE
   dt-storybook-creator  write a component's Storybook story, or explain why it should not have
                       one. Also self-contained and shareable.
   dt-test-account     create a staging test player and hand back its credentials and BO links.
+  dt-test-login       log a staging test player in and hand back a Playwright storageState.
   dt-inherit-branch   pick up a branch somebody else was working on, and know what you hold.
   dt-branch-update    bring a branch up to date with origin's default branch, then push.
   dt-merge-conflicts  a merge, rebase or cherry-pick stopped on conflicts.
@@ -75,6 +76,7 @@ reaching for those separately is only worth it when you want just that piece.
 | `dt-tailwind-migration-tool` | A component needs moving from styled-components to Tailwind | A component name or path | The component migrated, or a refusal naming the blocker, with every CSS declaration accounted for |
 | `dt-storybook-creator` | A component may need a Storybook story | A component name or path | The story written and looked at, or a refusal naming the rule that says it should not have one |
 | `dt-test-account` | You need a test player on staging | A brand and country, or a staging URL | The account created and verified, with its credentials and three backoffice links |
+| `dt-test-login` | A test run needs to start already signed in, usually an agent's own | A stage or test URL and an account email | A Playwright storageState holding the `AuthTokenV2` cookie, and the market it resolved. Creates no account |
 | `dt-branch-update` | A branch has fallen behind the default branch | The branch, or nothing for the current one | The merge committed, verified and pushed, or a refusal if the branch is a release branch |
 | `dt-merge-conflicts` | A merge, rebase or cherry-pick is sitting on conflicts | The repo mid-operation | Both sides' intentions kept, both sides' tests passing, the operation completed |
 | `dt-investigation` | You do not yet understand the code well enough to change it, or someone asked how something works | A topic, path, symbol, or nothing at all | A written report, changes nothing on disk |
@@ -144,21 +146,25 @@ at once.
    half of what gets asked for should not have one.
 18. **Is a staging test account needed?** `dt-test-account`. Staging only, and the backend picks the
    password rather than you.
-19. **Does the user want to say what they have been working on?** `dt-work-summary`. It reads
+19. **Does a browser test need to start signed in?** `dt-test-login`. It takes a stage URL and an
+   account email, logs that player in, and writes a Playwright storageState. It creates nothing, so
+   pair it with `dt-test-account` when there is no account yet, and it refuses any host that is not
+   a stage or test one.
+20. **Does the user want to say what they have been working on?** `dt-work-summary`. It reads
    git, GitHub, Slack and the tickets those name, covers their own work and nobody else's, defaults
    to the last day, and gives back a short summary and a list of bullets with nothing around them.
    It asks nothing at any point, including before reading private Slack and DMs.
-20. **Does an artifact need to become a file somebody can open?** `dt-artifact-export`. It folds
+21. **Does an artifact need to become a file somebody can open?** `dt-artifact-export`. It folds
    every font, script and image into one HTML file in Downloads, then loads it to prove nothing
    still reaches the network. Only works on artifacts the user owns.
-21. **Is the deliverable words rather than code?** `dt-unslop`, on its own.
-22. **Is a change written and cluttered with comments?** `dt-unslop-code`. `dt-implement` already
+22. **Is the deliverable words rather than code?** `dt-unslop`, on its own.
+23. **Is a change written and cluttered with comments?** `dt-unslop-code`. `dt-implement` already
     runs it, so reach for it separately only when the code was written outside that flow.
-23. **Does the user want a new dt skill?** `dt-skill-creator`. Only a person can invoke it, so say
+24. **Does the user want a new dt skill?** `dt-skill-creator`. Only a person can invoke it, so say
     that if an agent is the one asking.
-24. **Did a run just show a skill should have known something?** `dt-auto-improve-skill`. Most runs
+25. **Did a run just show a skill should have known something?** `dt-auto-improve-skill`. Most runs
    teach nothing, and saying so is the right answer.
-25. **None of the above.** Say so. See below.
+26. **None of the above.** Say so. See below.
 
 Two signals beat the list. If the user named a skill, they get that skill. If a phase inside a skill
 already running says to call another, that instruction wins over anything here.

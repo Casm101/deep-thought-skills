@@ -64,7 +64,7 @@ commits; `dt-ship` is the only one that pushes or opens a PR.
 | **The flow** | `dt-create-branch` → `dt-investigation` → `dt-grilling` → `dt-to-tasks` → `dt-tdd-prep` → `dt-implement` → `dt-ship` → `dt-pr-data` |
 | **Review** | `dt-code-review` (one agent), `dt-overkill-code-review` (three models, judged), `dt-pr-review` (posts on a PR), `dt-pr-defense` (answers the feedback) |
 | **Branches** | `dt-branch-update`, `dt-merge-conflicts`, `dt-inherit-branch`, `dt-handoff` |
-| **sportsbook-ui** | `dt-storybook-creator`, `dt-tailwind-migration-tool`, `dt-test-account`, `dt-pr-slack-message`, `dt-ticket-refiner` |
+| **sportsbook-ui** | `dt-storybook-creator`, `dt-tailwind-migration-tool`, `dt-test-account`, `dt-test-login`, `dt-pr-slack-message`, `dt-ticket-refiner` |
 | **Writing** | `dt-unslop` (all prose), `dt-unslop-code` (comments a change left behind) |
 | **Reporting** | `dt-work-summary` says what you got done over the last day or few, as prose then as short bullets |
 | **Artifacts** | `dt-artifact-export` turns a Claude artifact into one self-contained HTML file you can send anyone |
