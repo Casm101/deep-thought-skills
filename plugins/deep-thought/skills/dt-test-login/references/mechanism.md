@@ -82,6 +82,54 @@ the account's country first. Its add by email path does not, and this skill foll
 restriction cleared to make a login succeed changes the account under test, which is not something to
 do silently in the middle of a test run.
 
+## Proving a session took
+
+Two contexts on the same URL, one anonymous as the control, one with the storageState. Playwright
+reads the token from the file, so it never passes through the script or a transcript.
+
+```js
+import { chromium } from 'playwright-core';
+const [storageState, url] = process.argv.slice(2);
+const browser = await chromium.launch({ headless: true });
+
+async function look(label, ctx) {
+  const page = await ctx.newPage();
+  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.waitForTimeout(5000);
+  const seen = await page.evaluate(() => ({
+    hasAuthCookie: document.cookie.includes('AuthTokenV2'),
+    offersLogin: /\b(log ?in|sign ?in)\b/i.test(document.body.innerText),
+    offersLogout: /\b(log ?out|sign ?out)\b/i.test(document.body.innerText),
+    showsBalance: /[0-9][.,][0-9]{3}/.test(document.body.innerText),
+  }));
+  console.log(label, seen);
+  await ctx.close();
+  return seen;
+}
+
+const anon = await look('anonymous  ', await browser.newContext());
+const authed = await look('storageState', await browser.newContext({ storageState }));
+await browser.close();
+console.log(authed.hasAuthCookie && !anon.hasAuthCookie && anon.offersLogin !== authed.offersLogin
+  ? 'storageState authenticates the session.' : 'inconclusive, compare the two rows.');
+```
+
+A real run, leovegas on GB stage, an account created with a 2500 balance:
+
+```
+anonymous    { hasAuthCookie: false, offersLogin: true,  offersLogout: false, showsBalance: false }
+storageState { hasAuthCookie: true,  offersLogin: false, offersLogout: true,  showsBalance: true  }
+```
+
+The balance is the strongest of the four, because it is that player's own number rather than a
+generic signed-in shell. Match it against the `realAmount` the account was created with.
+
+The wait matters. These storefronts decide what to render after hydration, so reading the body
+immediately shows the logged out markup in both contexts and the check reports a false negative.
+
+`playwright-core` is enough and needs no browser download where `~/Library/Caches/ms-playwright`
+already has chromium. Install it outside any repository.
+
 ## Failures worth recognising
 
 **`Could not start session using specified user and credentials`** is the backend answering properly.

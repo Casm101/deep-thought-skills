@@ -57,22 +57,44 @@ says that, and a token on stdout ends up in a transcript.
 `references/mechanism.md` has the contract this reproduces, where it deviates, and the failures worth
 recognising. Read it when a login is refused or a session does not stick.
 
-## Phase 3. Use it
+## Phase 3. Prove the session took
+
+A token that parsed is not a session that works. Every way this goes wrong afterwards, an expired
+token, the wrong operator, a restriction applied between the login and the run, arrives as a browser
+that renders logged out and says nothing about why. A suite then fails somewhere unrelated, and the
+auth step looks like the one part that succeeded.
+
+So open the page twice, once anonymous and once with the storageState, and compare:
+
+```js
+const anon = await browser.newContext();
+const authed = await browser.newContext({ storageState: '<the path from the report>' });
+```
+
+On each, load the site and read whether the auth cookie arrived, whether the page offers a way in or a
+way out, and whether a balance is on screen. The storageState context must differ from the anonymous
+one on all three. `references/mechanism.md` has the check as a runnable script.
+
+Comparing against an anonymous context is what makes this worth running. A page that offers a logout
+link proves nothing on its own, because the check that reads it may be matching the wrong thing, and a
+second context exercising the same check without a token is the control.
+
+Let Playwright read the file. Loading the token in order to inspect it puts a live session token
+through a transcript, which is the one thing the never-list is protecting.
+
+## Phase 4. Hand it over
+
+Name the file, the market it resolved, the expiry, and the verdict from Phase 3. That is all the
+caller needs.
 
 ```js
 const context = await browser.newContext({ storageState: '<the path from the report>' });
 ```
 
-That is the whole integration. The cookie carries an 8 hour expiry, matching the extension, so a long
-run started near the end of that window will lose the session part way through. Rerun rather than
-extending it, because an expiry this skill invented is not one the backend agreed to.
-
-For something that is not Playwright, the same cookie goes in by hand. The file is a plain JSON object
-with one entry under `cookies`.
-
-## Phase 4. Say what happened
-
-Name the file, the market it resolved, and the expiry. That is all the caller needs.
+The cookie carries an 8 hour expiry, matching the extension, so a long run started near the end of
+that window will lose the session part way through. Rerun rather than extending it, because an expiry
+this skill invented is not one the backend agreed to. For something that is not Playwright, the same
+cookie goes in by hand: the file is a plain JSON object with one entry under `cookies`.
 
 Where the login failed, say which of the two it was, because they have different fixes: the account
 does not exist on that environment, or it exists and carries a login blocking restriction. The error
@@ -82,7 +104,10 @@ from the script distinguishes them.
 
 - Never send anything to a host that is not a recognised stage or test host. The allowlist is the
   boundary, and widening it to get a run working is a change to make deliberately, not mid task.
+- Never hand a storageState over as working without the Phase 3 comparison. Writing the file proves
+  the login answered, and nothing more.
 - Never print the auth token unless `--print-token` was explicitly asked for. It belongs in the file.
+  That includes reading it out of the file to check a session: let Playwright load it instead.
 - Never paste the storageState contents into a report, a commit, a PR, a ticket or a message. Name
   the path instead. The file is mode 600 for the same reason.
 - Never commit a storageState file, and never write one inside a repository.
