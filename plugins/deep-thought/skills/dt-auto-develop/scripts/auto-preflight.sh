@@ -27,7 +27,7 @@ ROOT=$(git rev-parse --show-toplevel); cd "$ROOT" || exit 1
 # rather than an install path or an environment variable.
 SKILLS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 MISSING=""
-for s in dt-create-branch dt-investigation dt-grilling dt-to-tasks dt-tdd-prep dt-implement dt-code-review dt-ship dt-pr-data dt-handoff dt-unslop; do
+for s in dt-create-branch dt-investigation dt-grilling dt-to-tasks dt-tdd-prep dt-implement dt-code-review dt-ship dt-pr-data dt-handoff dt-unslop dt-browser-run; do
   [ -f "$SKILLS_ROOT/$s/SKILL.md" ] || MISSING="$MISSING $s"
 done
 [ -z "$MISSING" ] && ok "all delegated skills present in the plugin" || no "missing skills:$MISSING"

@@ -1,6 +1,6 @@
 ---
 name: dt-auto-develop
-description: Run the main flow end to end without asking anything. Takes a Jira ticket key or a described task, creates the branch, investigates, settles the open design questions by answering them itself and logging every answer as an assumption, slices the work, implements it with tests, reviews it, pushes, and opens the PR. Keeps a log of every assumption it made and hands that back to whoever started the run. Stops and reports rather than guessing when the work is ambiguous, sensitive, or failing. Use when asked for "dt auto develop", or to take a ticket and build it unattended.
+description: Run the main flow end to end without asking anything. Takes a Jira ticket key or a described task, creates the branch, investigates, settles the open design questions by answering them itself and logging every answer as an assumption, slices the work, implements it with tests, reviews it, looks at the result in a real browser and screenshots it, pushes, and opens the PR. Keeps a log of every assumption it made and hands that back to whoever started the run, with the screenshots. Stops and reports rather than guessing when the work is ambiguous, sensitive, or failing. Use when asked for "dt auto develop", or to take a ticket and build it unattended.
 ---
 
 # dt-auto-develop
@@ -121,6 +121,30 @@ The rules `dt-implement` already carries still hold, and they matter more here b
 watching. Never weaken a test to get green. Never touch a guard test. Never disable a lint rule.
 Never `--no-verify`.
 
+## Phase 6b. Look at it in a browser
+
+Every phase so far proves the code compiles, passes its tests and reads well. None of them proves the
+thing the ticket asked for actually happens on screen, and a green suite around a feature nobody
+looked at is the failure this phase exists to catch.
+
+**Skip it when there is nothing to see**, and say so in one line. A build script, a type, a test
+helper, a dependency bump: no phase should invent a browser check for those.
+
+Otherwise take the visible half of the definition of done from Phase 1 and hand it to
+`dt-browser-run` as the mission. Point it at the app running locally, started the way this repository
+starts it, since the change is on a branch and deployed nowhere. Where the app cannot be started
+unattended, say that and skip rather than pointing at a stage host, which is running different code.
+
+`dt-browser-run` gets its own session through `dt-test-login` when the flow is behind a login, so
+that needs nothing here.
+
+**A failed check is a tripwire, not a retry.** It has already replanned once by the time it reports.
+Stop, and hand back the failing step with its screenshot. A change that does not do what the ticket
+described is not a change to ship because the tests were green.
+
+Keep the screenshots. They are the only evidence in this whole run that a human eye would recognise,
+and Phase 9 hands them back.
+
 ## Phase 7. Ship it
 
 Run `dt-ship`. A normal PR, not a draft.
@@ -144,9 +168,13 @@ for it and drop the framing. "The shared cache is deliberately not fixed, that e
 scope note, and it belongs under scope. "A1 in the assumption log, confidence medium, nobody reviewed
 this" is process talk, and it does not belong at all.
 
-The same goes for the checkboxes the template already has. Manual testing was not done, so leave that
-box unticked. That is the whole statement. It needs no paragraph explaining that the run had no
-browser.
+The same goes for the checkboxes the template already has. **Phase 6b drove a browser, and that is
+not manual testing, so the box stays unticked.** A script walking a flow and a person trying it are
+different claims, and ticking that box because a script ran is the sort of small dishonesty nobody
+catches until it matters. Leave it, and say nothing about why.
+
+A screenshot of the new behaviour is a different matter, and belongs in the description wherever the
+template has somewhere for it. That is a fact about the change rather than about how it was produced.
 
 ## Phase 8b. Memory
 
@@ -173,8 +201,12 @@ memory yourself; `dtm` never commits.
 ## Phase 9. Report
 
 Close with: the ticket, the branch, the PR URL, the tasks completed and skipped, the final suite
-result, what the review found and what you did about each finding, every tripwire you hit, and **the
-assumption log in full**. The report is where the log lives.
+result, what the review found and what you did about each finding, the screenshots from Phase 6b or
+the reason it was skipped, every tripwire you hit, and **the assumption log in full**. The report is
+where the log lives.
+
+Name the screenshot paths rather than describing what is in them. They are the one part of this
+report a person can check in seconds without trusting a word of the rest.
 
 If the run stopped early, say exactly where, then run `dt-handoff` so a person can pick it up without
 rereading any of this.
@@ -187,6 +219,10 @@ rereading any of this.
 - Touch money movement, identity, access control, migrations, secrets, or anything under AML, KYC,
   responsible gaming or fraud
 - Weaken, skip or delete a test, update a snapshot, or disable a check
+- Tick a manual testing box because Phase 6b ran. A script is not a person
+- Ship a change whose browser check failed, on the grounds that the suite was green
+- Point Phase 6b at a stage host to get around a dev server that will not start. That environment is
+  running different code, so a pass there proves nothing about this branch
 - Commit on the default branch, or with a red suite
 - Write anything into the PR about having run unattended
 - Carry on past a tripwire because the work was nearly done

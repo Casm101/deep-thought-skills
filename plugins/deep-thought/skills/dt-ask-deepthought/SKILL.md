@@ -36,8 +36,9 @@ OPTIONAL ON THE MAIN FLOW, after you implement and before the PR
                             against each other, when the change is large or risky.
 
 END TO END, UNATTENDED
-  dt-auto-develop  runs the whole main flow from a ticket with no human input, and finishes at an
-                   open PR, reporting back every assumption it had to make.
+  dt-auto-develop  runs the whole main flow from a ticket with no human input, looks at the result
+                   in a browser, and finishes at an open PR, reporting back every assumption it had
+                   to make and screenshots of the thing working.
 
 UNDERNEATH
   dt-unslop        runs inside the others, and on any writing at any point.
@@ -71,7 +72,7 @@ reaching for those separately is only worth it when you want just that piece.
 
 | Skill | Use it when | It needs | It gives back |
 |---|---|---|---|
-| `dt-auto-develop` | You want a ticket built with nobody watching, and a PR to review afterwards | A Jira key or a described task | An open PR with the change and its tests, and a log of every assumption it made, reported back to you |
+| `dt-auto-develop` | You want a ticket built with nobody watching, and a PR to review afterwards | A Jira key or a described task | An open PR with the change and its tests, screenshots of it working in a browser, and a log of every assumption it made, reported back to you |
 | `dt-create-branch` | The work has nowhere to live yet, usually because you are still on the default branch | A ticket key or a description of the work | A branch off the fetched default, named the way this repo names them |
 | `dt-inherit-branch` | You are taking over work somebody else started | The branch, or nothing for the current one | A briefing on where it stands and how complete it is, plus a memory of what nobody could reconstruct |
 | `dt-tailwind-migration-tool` | A component needs moving from styled-components to Tailwind | A component name or path | The component migrated, or a refusal naming the blocker, with every CSS declaration accounted for |
