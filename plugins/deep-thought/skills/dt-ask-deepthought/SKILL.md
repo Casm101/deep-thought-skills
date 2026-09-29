@@ -60,6 +60,7 @@ STANDALONE
   dt-handoff       the session is ending and someone else continues.
   dt-work-summary  what got done over the last day or few, as prose and as short bullets.
   dt-artifact-export  turn an artifact into one HTML file that opens with no network.
+  dt-explainer        animate a change, an article or a concept as a page drawn by code.
   dt-skill-creator builds a new dt skill. A person invokes it, never an agent.
   dt-ask-deepthought   this one.
 ```
@@ -101,6 +102,7 @@ reaching for those separately is only worth it when you want just that piece.
 | `dt-handoff` | The session is ending, or context is running out, and the work continues elsewhere | The conversation | A handoff document in the temp directory |
 | `dt-work-summary` | You need to say what you have been working on, for a standup, a recap or a one to one | A number of days, defaulting to 1, and optionally one repo. Asks nothing, ever | A short summary and a flat list of bullets under fifteen words each, with nothing around them |
 | `dt-artifact-export` | An artifact needs sending to somebody who cannot open the link, or keeping as a file | An artifact URL or title, and it must be one the user owns | One HTML file in Downloads with every font, script and image folded in, proved by loading it |
+| `dt-explainer` | A change or an idea is easier shown moving than described | Nothing for the current branch, or a URL, path or concept | A self contained HTML page with a scrubbable animation and captions, verified by reading a still of every scene. MP4 on request |
 | `dt-skill-creator` | The user wants a new dt skill built | An idea for one | The skill installed, wired into this router, and printed for review |
 
 ## How to choose
@@ -164,14 +166,18 @@ at once.
 22. **Does an artifact need to become a file somebody can open?** `dt-artifact-export`. It folds
    every font, script and image into one HTML file in Downloads, then loads it to prove nothing
    still reaches the network. Only works on artifacts the user owns.
-23. **Is the deliverable words rather than code?** `dt-unslop`, on its own.
-24. **Is a change written and cluttered with comments?** `dt-unslop-code`. `dt-implement` already
+23. **Would this land better as a moving picture than as prose?** `dt-explainer`. It storyboards
+   first and waits for a yes, then draws every frame in code and checks itself by exporting a
+   still of each scene. Good for data flow, lifecycles and before and after behaviour, and a
+   poor fit for anything that is really a paragraph.
+24. **Is the deliverable words rather than code?** `dt-unslop`, on its own.
+25. **Is a change written and cluttered with comments?** `dt-unslop-code`. `dt-implement` already
     runs it, so reach for it separately only when the code was written outside that flow.
-25. **Does the user want a new dt skill?** `dt-skill-creator`. Only a person can invoke it, so say
+26. **Does the user want a new dt skill?** `dt-skill-creator`. Only a person can invoke it, so say
     that if an agent is the one asking.
-26. **Did a run just show a skill should have known something?** `dt-auto-improve-skill`. Most runs
+27. **Did a run just show a skill should have known something?** `dt-auto-improve-skill`. Most runs
    teach nothing, and saying so is the right answer.
-27. **None of the above.** Say so. See below.
+28. **None of the above.** Say so. See below.
 
 Two signals beat the list. If the user named a skill, they get that skill. If a phase inside a skill
 already running says to call another, that instruction wins over anything here.

@@ -1,0 +1,699 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<meta name="description" content="{{DESCRIPTION}}">
+<style>
+  :root {
+    --bg: #f4f5f8;
+    --stage: #ffffff;
+    --surface: #f7f8fb;
+    --ink: #151923;
+    --muted: #5d6577;
+    --line: #d4d9e3;
+    --accent: #2f6fed;
+    --accent-2: #0e9a74;
+    --warn: #c9791f;
+    --danger: #d24545;
+    --caption-bg: rgba(21, 25, 35, 0.82);
+    --caption-ink: #ffffff;
+    --control-bg: #ffffff;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e1016;
+      --stage: #151822;
+      --surface: #1c2030;
+      --ink: #e9ecf3;
+      --muted: #9aa3b5;
+      --line: #313749;
+      --accent: #6a9bff;
+      --accent-2: #3fcf9f;
+      --warn: #f0a54a;
+      --danger: #ff7373;
+      --caption-bg: rgba(8, 10, 14, 0.82);
+      --caption-ink: #f3f5fa;
+      --control-bg: #1c2030;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e1016;
+    --stage: #151822;
+    --surface: #1c2030;
+    --ink: #e9ecf3;
+    --muted: #9aa3b5;
+    --line: #313749;
+    --accent: #6a9bff;
+    --accent-2: #3fcf9f;
+    --warn: #f0a54a;
+    --danger: #ff7373;
+    --caption-bg: rgba(8, 10, 14, 0.82);
+    --caption-ink: #f3f5fa;
+    --control-bg: #1c2030;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 1120px; margin: 0 auto; padding: 16px; }
+  header h1 { font-size: 1.25rem; margin: 0 0 4px; }
+  header p { margin: 0 0 12px; color: var(--muted); }
+
+  #stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: var(--stage);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    container-type: inline-size;
+  }
+  #stage canvas { display: block; width: 100%; height: 100%; }
+  #caption {
+    position: absolute;
+    left: 50%;
+    bottom: 5%;
+    transform: translateX(-50%);
+    max-width: 84%;
+    padding: 0.45em 0.9em;
+    border-radius: 0.5em;
+    background: var(--caption-bg);
+    color: var(--caption-ink);
+    font-size: clamp(12px, 2cqw, 40px);
+    line-height: 1.3;
+    text-align: center;
+    pointer-events: none;
+  }
+  #caption:empty { display: none; }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    margin-top: 12px;
+  }
+  .controls button, .chapters button {
+    font: inherit;
+    color: var(--ink);
+    background: var(--control-bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+  .controls button:focus-visible, .chapters button:focus-visible, .controls input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  #scrub { flex: 1 1 200px; min-width: 0; accent-color: var(--accent); }
+  #time { font-variant-numeric: tabular-nums; color: var(--muted); min-width: 7.5em; }
+  .volume { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); }
+  .volume input { width: 90px; accent-color: var(--accent); }
+  .chapters { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .chapters button { font-size: 13px; padding: 4px 10px; color: var(--muted); }
+  .chapters button[aria-current="step"] { color: var(--ink); border-color: var(--accent); }
+  [hidden] { display: none !important; }
+
+  /* Export mode: the stage fills the viewport, nothing else renders. */
+  html.export main { max-width: none; padding: 0; }
+  html.export header, html.export .controls, html.export .chapters { display: none; }
+  html.export #stage { width: 100vw; height: 100vh; aspect-ratio: auto; border: 0; border-radius: 0; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>{{TITLE}}</h1>
+    <p>{{DESCRIPTION}}</p>
+  </header>
+
+  <div id="stage">
+    <canvas id="canvas" role="img" aria-label="{{TITLE}} animation"></canvas>
+    <div id="caption" aria-live="polite"></div>
+  </div>
+
+  <div class="controls">
+    <button id="play" type="button" aria-label="Play">Play</button>
+    <input id="scrub" type="range" min="0" max="1" step="0.01" value="0" aria-label="Timeline">
+    <span id="time">0:00 / 0:00</span>
+    <button id="sound" type="button" aria-pressed="true" hidden>Sound on</button>
+    <label class="volume" id="music-volume" hidden>Music
+      <input id="music-level" type="range" min="0" max="1" step="0.05" value="0.5" aria-label="Music volume">
+    </label>
+  </div>
+  <nav class="chapters" id="chapters" aria-label="Scenes"></nav>
+</main>
+
+<script>
+/* ============================================================
+   CONFIG: fill in per explainer.
+   audio.enabled stays false unless the user opted in to sound.
+   ============================================================ */
+const CONFIG = {
+  fade: 0.35,            // seconds of cross-fade at scene edges
+  posterAt: 0.8,         // fraction of scene 1 shown before first play
+  audio: {
+    enabled: false,
+    music: false,        // procedural pad under the whole piece
+    sfx: false,          // procedural cues listed in each scene's `sfx`
+    musicVolume: 0.5,
+    sfxVolume: 0.8,
+  },
+};
+
+/* ============================================================
+   KIT: drawing helpers. Coordinates are in a fixed 1920x1080
+   space; the runtime scales to the real canvas size.
+   Every helper is a pure function of its arguments.
+   ============================================================ */
+const W = 1920, H = 1080;
+let ctx = null;          // set by the runtime
+let C = {};              // theme colours, refreshed every frame
+
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, x) => a + (b - a) * x;
+const seg = (p, a, b) => clamp((p - a) / (b - a));   // local 0..1 inside [a, b]
+const ease = {
+  out: x => 1 - Math.pow(1 - x, 3),
+  inOut: x => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2),
+  back: x => 1 + 2.2 * Math.pow(x - 1, 3) + 1.2 * Math.pow(x - 1, 2),
+};
+const appear = (p, a, b) => ease.out(seg(p, a, b));
+
+// Seeded PRNG. Never use Math.random in a scene: frames must be reproducible.
+function rng(seed) {
+  let s = seed >>> 0;
+  return () => {
+    s = (s + 0x6d2b79f5) >>> 0;
+    let r = Math.imul(s ^ (s >>> 15), 1 | s);
+    r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function withAlpha(alpha, fn) {
+  if (alpha <= 0) return;
+  ctx.save();
+  ctx.globalAlpha *= clamp(alpha);
+  fn();
+  ctx.restore();
+}
+
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, h, r);
+}
+
+function label(text, x, y, o = {}) {
+  withAlpha(o.alpha ?? 1, () => {
+    ctx.font = `${o.weight ?? 500} ${o.size ?? 32}px ${o.mono ? 'ui-monospace, SFMono-Regular, Menlo, monospace' : 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif'}`;
+    ctx.fillStyle = o.color ?? C.ink;
+    ctx.textAlign = o.align ?? 'center';
+    ctx.textBaseline = o.baseline ?? 'middle';
+    ctx.fillText(text, x, y);
+  });
+}
+
+// Box centred on (x, y). `scale` animates pop-in, `alpha` fades.
+function box(o) {
+  const { x, y, w = 280, h = 120, r = 18 } = o;
+  const s = o.scale ?? 1;
+  withAlpha(o.alpha ?? 1, () => {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(s, s);
+    roundRect(-w / 2, -h / 2, w, h, r);
+    ctx.fillStyle = o.fill ?? C.surface;
+    ctx.fill();
+    ctx.lineWidth = o.lineWidth ?? 3;
+    ctx.strokeStyle = o.stroke ?? C.line;
+    ctx.stroke();
+    if (o.label) label(o.label, 0, o.sub ? -16 : 0, { size: o.size ?? 34, weight: 600, color: o.color ?? C.ink });
+    if (o.sub) label(o.sub, 0, 24, { size: 24, color: C.muted, mono: o.mono });
+    ctx.restore();
+  });
+}
+
+// Arrow from `from` to `to`, drawn up to progress p.
+function arrow(o) {
+  const [x1, y1] = o.from, [x2, y2] = o.to;
+  const p = clamp(o.p ?? 1);
+  if (p <= 0) return;
+  const xe = lerp(x1, x2, p), ye = lerp(y1, y2, p);
+  withAlpha(o.alpha ?? 1, () => {
+    ctx.strokeStyle = ctx.fillStyle = o.color ?? C.muted;
+    ctx.lineWidth = o.width ?? 4;
+    ctx.lineCap = 'round';
+    ctx.setLineDash(o.dashed ? [14, 12] : []);
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(xe, ye);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    const a = Math.atan2(y2 - y1, x2 - x1), hs = 16;
+    ctx.beginPath();
+    ctx.moveTo(xe, ye);
+    ctx.lineTo(xe - hs * Math.cos(a - 0.45), ye - hs * Math.sin(a - 0.45));
+    ctx.lineTo(xe - hs * Math.cos(a + 0.45), ye - hs * Math.sin(a + 0.45));
+    ctx.closePath();
+    ctx.fill();
+    if (o.label) label(o.label, (x1 + x2) / 2, (y1 + y2) / 2 - 28, { size: 24, color: C.muted, alpha: p });
+  });
+}
+
+// A dot travelling along a polyline, e.g. a request or event.
+function travel(o) {
+  const pts = o.path, p = clamp(o.p ?? 0);
+  if (p <= 0 || p >= 1 && o.hideAtEnd) return;
+  const lens = [];
+  let total = 0;
+  for (let i = 1; i < pts.length; i++) {
+    const l = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+    lens.push(l);
+    total += l;
+  }
+  let d = total * p, i = 0;
+  while (i < lens.length - 1 && d > lens[i]) { d -= lens[i]; i++; }
+  const k = lens[i] ? d / lens[i] : 0;
+  const x = lerp(pts[i][0], pts[i + 1][0], k), y = lerp(pts[i][1], pts[i + 1][1], k);
+  withAlpha(o.alpha ?? 1, () => {
+    ctx.fillStyle = o.color ?? C.accent;
+    ctx.beginPath();
+    ctx.arc(x, y, o.r ?? 14, 0, Math.PI * 2);
+    ctx.fill();
+    if (o.text) label(o.text, x, y - (o.r ?? 14) - 22, { size: 22, color: o.color ?? C.accent, weight: 600 });
+  });
+}
+
+// Expanding ring, for "something happened here".
+function pulse(o) {
+  const p = clamp(o.p ?? 0);
+  if (p <= 0 || p >= 1) return;
+  withAlpha((1 - p) * (o.alpha ?? 1), () => {
+    ctx.strokeStyle = o.color ?? C.accent;
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(o.x, o.y, lerp(o.r0 ?? 10, o.r1 ?? 90, ease.out(p)), 0, Math.PI * 2);
+    ctx.stroke();
+  });
+}
+
+// Code panel, top-left at (x, y). Lines reveal with p; `highlight` marks line indexes.
+function codeBlock(o) {
+  const size = o.size ?? 26, lh = size * 1.55, pad = 28;
+  const lines = o.lines, w = o.w ?? 760, h = lines.length * lh + pad * 2;
+  const shown = Math.floor(clamp(o.p ?? 1) * lines.length + 0.0001);
+  withAlpha(o.alpha ?? 1, () => {
+    roundRect(o.x, o.y, w, h, 16);
+    ctx.fillStyle = C.surface;
+    ctx.fill();
+    ctx.strokeStyle = C.line;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    lines.slice(0, shown).forEach((line, i) => {
+      const ly = o.y + pad + i * lh;
+      if (o.highlight?.includes(i)) {
+        ctx.fillStyle = C.accent;
+        withAlpha(0.14, () => ctx.fillRect(o.x + 8, ly - 4, w - 16, lh));
+      }
+      label(line, o.x + pad, ly + lh / 2 - 2, { size, mono: true, align: 'left', weight: 400, color: o.highlight?.includes(i) ? C.ink : C.muted });
+    });
+  });
+}
+
+/* ============================================================
+   SCENES: one idea each. draw(p, t) gets p = 0..1 progress
+   through the scene and t = seconds into the scene.
+   `sfx` lists [secondsIntoScene, cueName]; cues: tick, blip,
+   pop, whoosh, chime, thud. Replace the example scenes below.
+   ============================================================ */
+const SCENES = [
+  {
+    id: 'request',
+    title: 'The request',
+    caption: 'The browser asks the server for data.',
+    dur: 6,
+    sfx: [[0.3, 'pop'], [1.6, 'whoosh'], [3.6, 'tick']],
+    draw(p) {
+      box({ x: 460, y: 440, label: 'Browser', sub: 'useQuery()', mono: true, scale: ease.back(seg(p, 0, 0.15)), alpha: seg(p, 0, 0.1) });
+      box({ x: 1460, y: 440, label: 'API', sub: '/v1/bets', mono: true, scale: ease.back(seg(p, 0.08, 0.23)), alpha: seg(p, 0.08, 0.18) });
+      arrow({ from: [620, 420], to: [1300, 420], p: appear(p, 0.25, 0.45), label: 'GET', color: C.accent });
+      travel({ path: [[620, 420], [1300, 420]], p: ease.inOut(seg(p, 0.45, 0.62)), hideAtEnd: true });
+      pulse({ x: 1460, y: 440, p: seg(p, 0.6, 0.8), r1: 180 });
+    },
+  },
+  {
+    id: 'cache',
+    title: 'The cache',
+    caption: 'The response lands in the cache under its query key.',
+    dur: 7,
+    sfx: [[0.2, 'blip'], [4.5, 'chime']],
+    draw(p) {
+      codeBlock({ x: 180, y: 260, p: appear(p, 0, 0.35), highlight: seg(p, 0.5, 0.55) > 0 ? [1] : [], lines: [
+        'const { data } = useQuery({',
+        "  queryKey: ['bets', status],",
+        '  queryFn: fetchBets,',
+        '});',
+      ] });
+      box({ x: 1380, y: 440, w: 420, h: 220, label: 'Query cache', sub: "['bets','open']", mono: true, stroke: C.accent2, alpha: seg(p, 0.4, 0.5), scale: ease.back(seg(p, 0.4, 0.55)) });
+      arrow({ from: [960, 400], to: [1150, 430], p: appear(p, 0.55, 0.7), color: C.accent2 });
+      pulse({ x: 1380, y: 440, p: seg(p, 0.65, 0.9), color: C.accent2, r1: 260 });
+    },
+  },
+];
+
+/* ============================================================
+   RUNTIME: timeline, playback, captions, audio, export hooks.
+   Normally no edits needed below this line.
+   ============================================================ */
+(() => {
+  const params = new URLSearchParams(location.search);
+  const EXPORT = params.has('export');
+  const root = document.documentElement;
+  if (params.get('theme')) root.dataset.theme = params.get('theme');
+  if (EXPORT) root.classList.add('export');
+
+  let acc = 0;
+  const timeline = SCENES.map(s => { const o = { ...s, start: acc }; acc += s.dur; return o; });
+  const DURATION = acc;
+
+  const canvas = document.getElementById('canvas');
+  const captionEl = document.getElementById('caption');
+  const playBtn = document.getElementById('play');
+  const scrub = document.getElementById('scrub');
+  const timeEl = document.getElementById('time');
+  const soundBtn = document.getElementById('sound');
+  const musicWrap = document.getElementById('music-volume');
+  const musicLevel = document.getElementById('music-level');
+  const chaptersEl = document.getElementById('chapters');
+  ctx = canvas.getContext('2d');
+  scrub.max = String(DURATION);
+
+  const TOKENS = { bg: '--bg', stage: '--stage', surface: '--surface', ink: '--ink', muted: '--muted', line: '--line', accent: '--accent', accent2: '--accent-2', warn: '--warn', danger: '--danger' };
+  function readColors() {
+    const cs = getComputedStyle(root);
+    for (const [k, v] of Object.entries(TOKENS)) C[k] = cs.getPropertyValue(v).trim();
+  }
+
+  const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+  const sceneIndexAt = t => {
+    let i = 0;
+    while (i < timeline.length - 1 && t >= timeline[i + 1].start) i++;
+    return i;
+  };
+
+  const chapterBtns = timeline.map((s, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = `${i + 1}. ${s.title ?? s.id}`;
+    b.addEventListener('click', () => seek(s.start));
+    chaptersEl.appendChild(b);
+    return b;
+  });
+
+  let shownScene = -1;
+  function render(t) {
+    t = clamp(t, 0, DURATION);
+    readColors();
+    const i = sceneIndexAt(t), s = timeline[i];
+    const local = t - s.start;
+    const p = s.dur ? clamp(local / s.dur) : 1;
+    const fadeIn = i === 0 ? 1 : clamp(local / CONFIG.fade);
+    const fadeOut = i === timeline.length - 1 ? 1 : clamp((s.dur - local) / CONFIG.fade);
+    const alpha = Math.min(fadeIn, fadeOut);
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = C.stage;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const k = canvas.width / W;
+    ctx.setTransform(k, 0, 0, canvas.height / H, 0, 0);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    s.draw(p, local);
+    ctx.restore();
+
+    if (i !== shownScene) {
+      captionEl.textContent = s.caption ?? '';
+      chapterBtns.forEach((b, j) => (j === i ? b.setAttribute('aria-current', 'step') : b.removeAttribute('aria-current')));
+      shownScene = i;
+    }
+    captionEl.style.opacity = String(alpha);
+    scrub.value = String(t);
+    timeEl.textContent = `${fmt(t)} / ${fmt(DURATION)}`;
+  }
+
+  function resize() {
+    const r = canvas.getBoundingClientRect();
+    const dpr = EXPORT ? (window.devicePixelRatio || 1) : Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.max(1, Math.round(r.width * dpr));
+    canvas.height = Math.max(1, Math.round(r.height * dpr));
+    render(state.shown);
+  }
+
+  /* ---------- Audio: procedural, scheduled against a timeline offset ---------- */
+  const audioCfg = CONFIG.audio;
+  const HAS_AUDIO = !!(audioCfg.enabled && (audioCfg.music || audioCfg.sfx));
+  const cues = timeline.flatMap(s => (s.sfx ?? []).map(([at, type]) => ({ t: s.start + at, type })));
+
+  function noise(ac, seconds) {
+    const buf = ac.createBuffer(1, Math.ceil(ac.sampleRate * seconds), ac.sampleRate);
+    const d = buf.getChannelData(0), r = rng(7);
+    for (let i = 0; i < d.length; i++) d[i] = r() * 2 - 1;
+    return buf;
+  }
+  function tone(ac, out, at, { type = 'sine', f0, f1, dur, gain }) {
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f0, at);
+    if (f1) o.frequency.exponentialRampToValueAtTime(f1, at + dur * 0.8);
+    g.gain.setValueAtTime(0.0001, at);
+    g.gain.exponentialRampToValueAtTime(gain, at + 0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+    o.connect(g).connect(out);
+    o.start(at);
+    o.stop(at + dur + 0.05);
+  }
+  const SFX = {
+    tick: (ac, out, at) => tone(ac, out, at, { f0: 1400, dur: 0.06, gain: 0.22 }),
+    blip: (ac, out, at) => tone(ac, out, at, { type: 'triangle', f0: 520, f1: 900, dur: 0.16, gain: 0.28 }),
+    pop: (ac, out, at) => tone(ac, out, at, { f0: 620, f1: 180, dur: 0.14, gain: 0.32 }),
+    thud: (ac, out, at) => tone(ac, out, at, { f0: 130, f1: 48, dur: 0.3, gain: 0.5 }),
+    chime: (ac, out, at) => {
+      tone(ac, out, at, { f0: 880, dur: 1.2, gain: 0.16 });
+      tone(ac, out, at + 0.07, { f0: 1320, dur: 1.1, gain: 0.11 });
+    },
+    whoosh: (ac, out, at) => {
+      const src = ac.createBufferSource(), bp = ac.createBiquadFilter(), g = ac.createGain();
+      src.buffer = noise(ac, 0.6);
+      bp.type = 'bandpass';
+      bp.Q.value = 1.2;
+      bp.frequency.setValueAtTime(300, at);
+      bp.frequency.exponentialRampToValueAtTime(2600, at + 0.45);
+      g.gain.setValueAtTime(0.0001, at);
+      g.gain.exponentialRampToValueAtTime(0.35, at + 0.15);
+      g.gain.exponentialRampToValueAtTime(0.0001, at + 0.55);
+      src.connect(bp).connect(g).connect(out);
+      src.start(at);
+      src.stop(at + 0.6);
+    },
+  };
+
+  // Am - F - C - G pad with a soft bass, 4 s per chord.
+  const CHORDS = [
+    { bass: 110.0, notes: [220.0, 261.63, 329.63] },
+    { bass: 87.31, notes: [174.61, 220.0, 261.63] },
+    { bass: 130.81, notes: [261.63, 329.63, 392.0] },
+    { bass: 98.0, notes: [196.0, 246.94, 293.66] },
+  ];
+  const BAR = 4;
+  function music(ac, out, from, at) {
+    const lp = ac.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 1100;
+    lp.connect(out);
+    for (let k = 0; k * BAR < DURATION; k++) {
+      const cs = k * BAR, ce = Math.min(cs + BAR, DURATION);
+      if (ce <= from) continue;
+      const start = Math.max(cs, from), chord = CHORDS[k % CHORDS.length];
+      const voices = [
+        ...chord.notes.flatMap(f => [{ f, detune: -6, lvl: 0.05 }, { f, detune: 6, lvl: 0.05 }]),
+        { f: chord.bass, detune: 0, lvl: 0.09 },
+      ];
+      for (const v of voices) {
+        const o = ac.createOscillator(), g = ac.createGain();
+        o.type = v.f < 150 ? 'sine' : 'triangle';
+        o.frequency.value = v.f;
+        o.detune.value = v.detune;
+        const a = at(start), e = at(ce);
+        g.gain.setValueAtTime(0, a);
+        g.gain.linearRampToValueAtTime(v.lvl, a + Math.min(1.2, (e - a) / 3));
+        g.gain.setValueAtTime(v.lvl, Math.max(a + 0.01, e - 0.8));
+        g.gain.linearRampToValueAtTime(0, e + 0.6);
+        o.connect(g).connect(lp);
+        o.start(a);
+        o.stop(e + 0.7);
+      }
+    }
+  }
+
+  function scheduleAudio(ac, out, from) {
+    const lead = typeof OfflineAudioContext !== 'undefined' && ac instanceof OfflineAudioContext ? 0 : 0.05;
+    const t0 = ac.currentTime + lead;
+    const at = tl => t0 + (tl - from);
+    const master = ac.createGain();
+    master.connect(out);
+    let musicGain = null;
+    if (audioCfg.music) {
+      musicGain = ac.createGain();
+      musicGain.gain.value = audioCfg.musicVolume;
+      musicGain.connect(master);
+      music(ac, musicGain, from, at);
+    }
+    if (audioCfg.sfx) {
+      const sfxGain = ac.createGain();
+      sfxGain.gain.value = audioCfg.sfxVolume;
+      sfxGain.connect(master);
+      for (const c of cues) if (c.t >= from - 0.01) SFX[c.type]?.(ac, sfxGain, at(c.t));
+    }
+    return { master, musicGain };
+  }
+
+  let audioCtx = null, session = null, soundOn = HAS_AUDIO;
+  function audioStart(from) {
+    if (!HAS_AUDIO || !soundOn || EXPORT) return;
+    audioCtx ??= new AudioContext();
+    audioCtx.resume();
+    session = scheduleAudio(audioCtx, audioCtx.destination, from);
+  }
+  function audioStop() {
+    if (!session) return;
+    const s = session;
+    session = null;
+    s.master.gain.setTargetAtTime(0, audioCtx.currentTime, 0.03);
+    setTimeout(() => s.master.disconnect(), 250);
+  }
+
+  function encodeWav(buf) {
+    const ch = buf.numberOfChannels, len = buf.length, sr = buf.sampleRate;
+    const view = new DataView(new ArrayBuffer(44 + len * ch * 2));
+    const str = (o, s) => { for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); };
+    str(0, 'RIFF'); view.setUint32(4, 36 + len * ch * 2, true); str(8, 'WAVE');
+    str(12, 'fmt '); view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, ch, true);
+    view.setUint32(24, sr, true); view.setUint32(28, sr * ch * 2, true); view.setUint16(32, ch * 2, true); view.setUint16(34, 16, true);
+    str(36, 'data'); view.setUint32(40, len * ch * 2, true);
+    const data = Array.from({ length: ch }, (_, c) => buf.getChannelData(c));
+    let o = 44;
+    for (let i = 0; i < len; i++) for (let c = 0; c < ch; c++, o += 2) view.setInt16(o, clamp(data[c][i], -1, 1) * 0x7fff, true);
+    const bytes = new Uint8Array(view.buffer);
+    let bin = '';
+    for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    return btoa(bin);
+  }
+
+  /* ---------- Playback ---------- */
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const state = { t: 0, shown: 0, playing: false, last: 0, started: false };
+
+  function frame(now) {
+    if (!state.playing) return;
+    state.t = Math.min(DURATION, state.t + (now - state.last) / 1000);
+    state.last = now;
+    state.shown = state.t;
+    render(state.t);
+    if (state.t >= DURATION) return pause();
+    requestAnimationFrame(frame);
+  }
+  function play() {
+    if (!state.started || state.t >= DURATION) state.t = 0;
+    state.started = true;
+    state.playing = true;
+    state.last = performance.now();
+    playBtn.textContent = 'Pause';
+    playBtn.setAttribute('aria-label', 'Pause');
+    audioStart(state.t);
+    requestAnimationFrame(frame);
+  }
+  function pause() {
+    state.playing = false;
+    playBtn.textContent = state.t >= DURATION ? 'Replay' : 'Play';
+    playBtn.setAttribute('aria-label', playBtn.textContent);
+    audioStop();
+  }
+  function seek(t) {
+    state.t = state.shown = clamp(t, 0, DURATION);
+    state.started = true;
+    render(state.t);
+    if (state.playing) { audioStop(); audioStart(state.t); }
+  }
+
+  playBtn.addEventListener('click', () => (state.playing ? pause() : play()));
+  scrub.addEventListener('input', () => seek(Number(scrub.value)));
+  document.addEventListener('keydown', e => {
+    if (e.target.closest?.('input, button')) return;
+    if (e.key === ' ') { e.preventDefault(); state.playing ? pause() : play(); }
+    if (e.key === 'ArrowRight') seek(state.t + 5);
+    if (e.key === 'ArrowLeft') seek(state.t - 5);
+    if (e.key === 'Home') seek(0);
+  });
+
+  if (HAS_AUDIO) {
+    soundBtn.hidden = false;
+    soundBtn.addEventListener('click', () => {
+      soundOn = !soundOn;
+      soundBtn.textContent = soundOn ? 'Sound on' : 'Sound off';
+      soundBtn.setAttribute('aria-pressed', String(soundOn));
+      if (!soundOn) audioStop();
+      else if (state.playing) audioStart(state.t);
+    });
+  }
+  if (HAS_AUDIO && audioCfg.music) {
+    musicWrap.hidden = false;
+    musicLevel.value = String(audioCfg.musicVolume);
+    musicLevel.addEventListener('input', () => {
+      audioCfg.musicVolume = Number(musicLevel.value);
+      if (session?.musicGain) session.musicGain.gain.setTargetAtTime(audioCfg.musicVolume, audioCtx.currentTime, 0.05);
+    });
+  }
+
+  new ResizeObserver(resize).observe(canvas);
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => render(state.shown));
+
+  // Poster frame before first play (scene 1 mostly built), unless exporting.
+  state.shown = EXPORT ? 0 : timeline[0].dur * CONFIG.posterAt;
+  if (reduceMotion) playBtn.textContent = 'Play (motion)';
+
+  /* ---------- Hooks for scripts/export.mjs ---------- */
+  window.explainer = {
+    duration: DURATION,
+    hasAudio: HAS_AUDIO,
+    scenes: timeline.map(({ id, title, caption, start, dur }) => ({ id, title, caption, start, dur })),
+    ready: document.fonts.ready.then(() => { resize(); return true; }),
+    seek(t) {
+      state.shown = clamp(t, 0, DURATION);
+      render(state.shown);
+      for (const a of document.getAnimations()) { a.pause(); a.currentTime = state.shown * 1000; }
+    },
+    async renderWav() {
+      if (!HAS_AUDIO) return null;
+      const sr = 44100;
+      const oac = new OfflineAudioContext(2, Math.ceil(sr * (DURATION + 0.5)), sr);
+      scheduleAudio(oac, oac.destination, 0);
+      return encodeWav(await oac.startRendering());
+    },
+  };
+})();
+</script>
+</body>
+</html>
