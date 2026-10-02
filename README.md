@@ -70,6 +70,7 @@ commits; `dt-ship` is the only one that pushes or opens a PR.
 | **Artifacts** | `dt-artifact-export` turns a Claude artifact into one self-contained HTML file you can send anyone |
 | **Browser** | `dt-test-login` gets a session, `dt-browser-run` drives the page and photographs what happened |
 | **Explaining** | `dt-explainer` animates a change or a concept as a self-contained page drawn by code |
+| **People** | `dt-who` maps a name to its Slack, GitHub and email identities, kept in the memory store |
 | **Unattended** | `dt-auto-develop` runs the whole flow from a ticket and stops rather than guessing |
 | **The suite itself** | `dt-skill-creator` (new skills), `dt-auto-improve-skill` (fold a lesson back in) |
 
