@@ -1,0 +1,9 @@
+{
+  "name": "message-times",
+  "version": "0.1.0",
+  "description": "A dim timestamp under each of your messages and each of Claude's replies",
+  "author": {
+    "name": "Christian Smith Mantas"
+  },
+  "types": "./types/index.d.ts"
+}

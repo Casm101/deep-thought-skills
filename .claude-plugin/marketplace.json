@@ -21,6 +21,14 @@
         "name": "Christian Smith Mantas"
       },
       "source": "./mods/skill-bar"
+    },
+    {
+      "name": "message-times",
+      "description": "A dim time under each message you send and each block of Claude's reply, with the date for earlier days. /message-times hides or shows them.",
+      "author": {
+        "name": "Christian Smith Mantas"
+      },
+      "source": "./mods/message-times"
     }
   ]
 }
