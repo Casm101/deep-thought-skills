@@ -81,11 +81,15 @@ run_env() {
   else
     ok "the marketplace does not list \"$name\""
   fi
-  if grep -qF 'mods/*/.claude-plugin/types/' "$repo/.gitignore" 2>/dev/null; then
-    ok ".gitignore already ignores the types the engine lays beside a mod"
-  else
-    warn ".gitignore lacks mods/*/.claude-plugin/types/; add it with the mod"
-  fi
+  # The engine lays both beside a mod it loads, and neither belongs in the repo.
+  local generated
+  for generated in 'mods/*/.claude-plugin/types/' 'mods/*/tsconfig.json'; do
+    if grep -qF "$generated" "$repo/.gitignore" 2>/dev/null; then
+      ok ".gitignore already ignores $generated"
+    else
+      warn ".gitignore lacks $generated; add it with the mod"
+    fi
+  done
   if [ -n "${CLAUDE_CODE_SESSION_ID:-}" ]; then
     ok "the person links into ~/.claude/dev-mods/$CLAUDE_CODE_SESSION_ID/"
   else

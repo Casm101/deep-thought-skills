@@ -39,8 +39,13 @@ const engine = (on: On): string[] => {
 
 - The test's `$` has no `state` noun. Assert through the drawing, for example by remounting and
   finding the persisted value.
-- `$.command.run` needs `origin: { kind: 'composer' }` and `presentation: { isFullscreen: false,
-  columns: 80 }`.
+- `session.start` never fires under `plugin test`. Anything a drawing needs from a lookup made
+  there (`$.command.list()`, say) is missing in every test, so look it up in the render hook
+  instead, which also picks up what changes later in the session.
+- `$.command.run` needs `args: ''`, `origin: { kind: 'composer' }` and `presentation: {
+  isFullscreen: false, columns: 80 }`.
+- `$.session.append({ message, door, origin, uuid })` raises `session.append` through the plugin as
+  a session does, and `mock.clock(on, { now })` sets the time a hook reads from `$.clock.now()`.
 - A band mounts with `props: { hasSurvey: false, isWorking, maxRows: 20, bodyColumns: 80, scroll: {
   offset: 0, bodyRows: 20 }, view: {} }`.
 - `ui.advance(ms)` drives `surface.every`. `ui.key`, `ui.pointer` and `ui.resize` act on a

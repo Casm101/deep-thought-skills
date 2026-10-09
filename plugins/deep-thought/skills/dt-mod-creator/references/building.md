@@ -17,9 +17,9 @@ mods/<name>/
   README.md
 ```
 
-The engine lays `.claude-plugin/types/` beside a mod each time it loads it. It is generated, so the
-repo's `.gitignore` carries `mods/*/.claude-plugin/types/`. Add that line with the first mod if it
-is missing.
+The engine lays `.claude-plugin/types/`, and a `tsconfig.json` that extends it, beside a mod each
+time it loads it. Both are generated, so the repo's `.gitignore` carries `mods/*/.claude-plugin/types/`
+and `mods/*/tsconfig.json`. Add whichever is missing with the first mod.
 
 `plugin.json`:
 
@@ -65,6 +65,15 @@ on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
   `next` was not called. `claude plugin validate` lists every gating hook with or without one.
 - A slash command is `$.command.register` in `session.start` plus a `command.run` hook returning
   `{ text }`.
+- A site's `requestId` is not always the id another event hands you. A `UserMessage` is drawn under
+  its transcript row's `uuid`, the one `session.append` carries, but an `AssistantMessage` block is
+  drawn under `<API message id>-t<n>`, which no event hands a mod. Find a reply by its text and pin
+  what you find to the block's id. The transcript file cannot bridge the gap either, since it
+  passes the 4 MiB `$.fs.read` limit within a long session.
+- Before keying a drawing on any id the types do not spell out, probe it live. Have the render hook
+  call `$.clock.after(0, ...)` to `$.store.set` the ids it sees, since a drawing cannot write, then
+  read `~/.claude/plugins/store/<name>_inline-*.json` from the shell. Take the probe out before
+  Phase 6.
 
 ## Where it shows
 
@@ -82,6 +91,11 @@ and has nothing to do with mods; a mod's status line is `$.ui.status(text)`.
 
 A pane opened unasked (from `session.start` or a timer) seats only from 144 terminal columns. Open
 one from a command or a button press, or check `e.viewport.isFullscreen` first.
+
+On the desktop, the band above the prompt sits in the app's own rounded panel, which a mod cannot
+remove. A `plain` Button there is a number badge and its label; without `plain` each Button gets its
+own outline. The person's messages are bubbles on the right, so anything drawn under a `UserMessage`
+there goes in a `Box` with `justifyContent="flex-end"`, or it lands on the left under nothing.
 
 ## Client modules, for anything animated or interactive
 
