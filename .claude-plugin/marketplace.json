@@ -13,6 +13,14 @@
         "name": "Christian Smith Mantas"
       },
       "source": "./plugins/deep-thought"
+    },
+    {
+      "name": "skill-bar",
+      "description": "A row of buttons above the prompt for your six most used dt skills, labelled by plain name. A press puts the skill's command in the prompt box for you to finish and send; /skill-bar hides or shows the row.",
+      "author": {
+        "name": "Christian Smith Mantas"
+      },
+      "source": "./mods/skill-bar"
     }
   ]
 }

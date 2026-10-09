@@ -3,5 +3,6 @@ node_modules/
 __pycache__/
 *.pyc
 
-# Type declarations Claude Code lays beside a mod it loads
+# Type declarations and the tsconfig Claude Code lays beside a mod it loads
 mods/*/.claude-plugin/types/
+mods/*/tsconfig.json

@@ -1,0 +1,9 @@
+{
+  "name": "skill-bar",
+  "version": "0.1.0",
+  "description": "A row of buttons above the prompt that fill in your most used dt skills",
+  "author": {
+    "name": "Christian Smith Mantas"
+  },
+  "types": "./types/index.d.ts"
+}
