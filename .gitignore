@@ -2,3 +2,6 @@
 node_modules/
 __pycache__/
 *.pyc
+
+# Type declarations Claude Code lays beside a mod it loads
+mods/*/.claude-plugin/types/

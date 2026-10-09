@@ -62,13 +62,16 @@ STANDALONE
   dt-artifact-export  turn an artifact into one HTML file that opens with no network.
   dt-explainer        animate a change, an article or a concept as a page drawn by code.
   dt-who              a name in a prompt becomes a Slack id, a GitHub handle and a team.
+  dt-mod-creator      build a Claude Code mod, show it running live, ship and install it.
   dt-skill-creator builds a new dt skill. A person invokes it, never an agent.
   dt-ask-deepthought   this one.
 ```
 
-`dt-implement` is the only skill that writes code or commits. Every other one reads, reports, or
-posts to GitHub. It runs `dt-tdd-prep` before it starts and `dt-code-review` before it commits, so
-reaching for those separately is only worth it when you want just that piece.
+`dt-implement` is the only skill that writes code or commits on a working branch. The two that
+build into this repository itself, `dt-skill-creator` and `dt-mod-creator`, commit and push to its
+`main`. Every other one reads, reports, or posts to GitHub. `dt-implement` runs `dt-tdd-prep`
+before it starts and `dt-code-review` before it commits, so reaching for those separately is only
+worth it when you want just that piece.
 
 ## The roster
 
@@ -105,6 +108,7 @@ reaching for those separately is only worth it when you want just that piece.
 | `dt-artifact-export` | An artifact needs sending to somebody who cannot open the link, or keeping as a file | An artifact URL or title, and it must be one the user owns | One HTML file in Downloads with every font, script and image folded in, proved by loading it |
 | `dt-explainer` | A change or an idea is easier shown moving than described | Nothing for the current branch, or a URL, path or concept | A self contained HTML page with a scrubbable animation and captions, verified by reading a still of every scene. MP4 on request |
 | `dt-who` | A request names somebody and needs their identifier, or you want to know who they are | A name, alias, handle, email or Slack id | Their Slack id, GitHub handle, email, team and areas, from the directory. Looks up and records anyone new |
+| `dt-mod-creator` | The user wants something running inside Claude Code itself, a band above the prompt, a pane, a status line, a guard on tool calls, a slash command or a game | What the mod should do, in a sentence | The mod built under `mods/`, proved on the terminal and desktop, seen running live, then committed to `main` and installed once the user says it looks good |
 | `dt-skill-creator` | The user wants a new dt skill built | An idea for one | The skill installed, wired into this router, and printed for review |
 
 ## How to choose
@@ -131,59 +135,63 @@ at once.
    `dt-pr-defense`. If the user is reviewing someone else's, `dt-pr-review`. If the PR exists and only
    its description is wrong, `dt-pr-data`.
 9. **Is the session about to end or be handed over?** `dt-handoff`, before anything else gets lost.
-10. **Are there open design decisions nobody has made yet?** `dt-grilling`. It interviews in rounds
+10. **Does the user want something running inside Claude Code itself?** `dt-mod-creator`, for a
+    band, a pane, a status line, a toast, a guard on tool calls, a slash command or a game. It
+    builds on the built-in `plugin-authoring` skill, which cannot write past this machine's
+    dev-mods fence on its own, and commits nothing until the user has seen the mod running.
+11. **Are there open design decisions nobody has made yet?** `dt-grilling`. It interviews in rounds
    until the design is agreed, looks facts up itself, and hands back a decision tree. Reach for it
    whenever starting would mean guessing at what someone wanted.
-11. **Is the work understood but too big to do in one pass?** `dt-to-tasks`, to break it into vertical
+12. **Is the work understood but too big to do in one pass?** `dt-to-tasks`, to break it into vertical
    tasks with their blocking edges. It asks nothing about requirements, only about the breakdown.
-12. **Is a ticket too thin to build from?** `dt-ticket-refiner`. Only a person can invoke it, and it
+13. **Is a ticket too thin to build from?** `dt-ticket-refiner`. Only a person can invoke it, and it
    writes to Jira, so it asks before every edit.
-13. **Is the work understood and the ask is to build it?** `dt-implement`. It handles the tests, the
+14. **Is the work understood and the ask is to build it?** `dt-implement`. It handles the tests, the
    loop, the review and the commit. Reach for `dt-tdd-prep` on its own only when the tests are all
    that is wanted.
-14. **Does the user not yet know how the thing works?** `dt-investigation`. This is the honest answer
+15. **Does the user not yet know how the thing works?** `dt-investigation`. This is the honest answer
    whenever the next step is guesswork, and it is the most common right answer at the start.
-15. **Is there a change on the branch to review before a PR exists?** `dt-code-review` for a normal
+16. **Is there a change on the branch to review before a PR exists?** `dt-code-review` for a normal
    change. `dt-overkill-code-review` when it is large, touches money or data, or would be expensive
    to get wrong, and say what that costs first: three full reviews of the same diff. Once a PR is
    open, `dt-pr-review` is the one to reach for, and it picks between these two by PR size itself.
-16. **Is a component moving from styled-components to Tailwind?** `dt-tailwind-migration-tool`. It
+17. **Is a component moving from styled-components to Tailwind?** `dt-tailwind-migration-tool`. It
     screens first and refuses on `applyFont` or breakpoints, which is most components today.
-17. **Does a component need a Storybook story?** `dt-storybook-creator`. It screens first, and about
+18. **Does a component need a Storybook story?** `dt-storybook-creator`. It screens first, and about
    half of what gets asked for should not have one.
-18. **Is a staging test account needed?** `dt-test-account`. Staging only, and the backend picks the
+19. **Is a staging test account needed?** `dt-test-account`. Staging only, and the backend picks the
    password rather than you.
-19. **Does a browser test need to start signed in?** `dt-test-login`. It takes a stage URL and an
+20. **Does a browser test need to start signed in?** `dt-test-login`. It takes a stage URL and an
    account email, logs that player in, and writes a Playwright storageState. It creates nothing, so
    pair it with `dt-test-account` when there is no account yet, and it refuses any host that is not
    a stage or test one.
-20. **Does something need doing or checking in a real browser?** `dt-browser-run`. It takes a
+21. **Does something need doing or checking in a real browser?** `dt-browser-run`. It takes a
    strict list of actions or a mission it plans first, runs it with Playwright against localhost
    or a stage host, and hands back screenshots of every change and any failure. It authenticates
    itself with `dt-test-login` when the work is behind a login.
-21. **Does the user want to say what they have been working on?** `dt-work-summary`. It reads
+22. **Does the user want to say what they have been working on?** `dt-work-summary`. It reads
    git, GitHub, Slack and the tickets those name, covers their own work and nobody else's, defaults
    to the last day, and gives back a short summary and a list of bullets with nothing around them.
    It asks nothing at any point, including before reading private Slack and DMs.
-22. **Does an artifact need to become a file somebody can open?** `dt-artifact-export`. It folds
+23. **Does an artifact need to become a file somebody can open?** `dt-artifact-export`. It folds
    every font, script and image into one HTML file in Downloads, then loads it to prove nothing
    still reaches the network. Only works on artifacts the user owns.
-23. **Would this land better as a moving picture than as prose?** `dt-explainer`. It storyboards
+24. **Would this land better as a moving picture than as prose?** `dt-explainer`. It storyboards
    first and waits for a yes, then draws every frame in code and checks itself by exporting a
    still of each scene. Good for data flow, lifecycles and before and after behaviour, and a
    poor fit for anything that is really a paragraph.
-24. **Does a name in the request need to become an identifier?** `dt-who`. It reads the directory
+25. **Does a name in the request need to become an identifier?** `dt-who`. It reads the directory
    in the memory store before any network call, looks up anyone new in Slack and in local commit
    history, and records them. Reach for it whenever a request mentions a person and needs their
    Slack id or GitHub handle to act.
-25. **Is the deliverable words rather than code?** `dt-unslop`, on its own.
-26. **Is a change written and cluttered with comments?** `dt-unslop-code`. `dt-implement` already
+26. **Is the deliverable words rather than code?** `dt-unslop`, on its own.
+27. **Is a change written and cluttered with comments?** `dt-unslop-code`. `dt-implement` already
     runs it, so reach for it separately only when the code was written outside that flow.
-27. **Does the user want a new dt skill?** `dt-skill-creator`. Only a person can invoke it, so say
+28. **Does the user want a new dt skill?** `dt-skill-creator`. Only a person can invoke it, so say
     that if an agent is the one asking.
-28. **Did a run just show a skill should have known something?** `dt-auto-improve-skill`. Most runs
+29. **Did a run just show a skill should have known something?** `dt-auto-improve-skill`. Most runs
    teach nothing, and saying so is the right answer.
-29. **None of the above.** Say so. See below.
+30. **None of the above.** Say so. See below.
 
 Two signals beat the list. If the user named a skill, they get that skill. If a phase inside a skill
 already running says to call another, that instruction wins over anything here.

@@ -72,11 +72,23 @@ commits; `dt-ship` is the only one that pushes or opens a PR.
 | **Explaining** | `dt-explainer` animates a change or a concept as a self-contained page drawn by code |
 | **People** | `dt-who` maps a name to its Slack, GitHub and email identities, kept in the memory store |
 | **Unattended** | `dt-auto-develop` runs the whole flow from a ticket and stops rather than guessing |
+| **Mods** | `dt-mod-creator` builds a Claude Code mod in `mods/`, shows it running, then ships and installs it |
 | **The suite itself** | `dt-skill-creator` (new skills), `dt-auto-improve-skill` (fold a lesson back in) |
 
 Ask **`dt-ask-deepthought`** which one fits instead of remembering the set. Every skill also has a
 `/dt-<name>` slash command, which is the only way into the three that carry
 `disable-model-invocation: true` (`dt-handoff`, `dt-skill-creator`, `dt-ticket-refiner`).
+
+### Mods
+
+A mod is a plugin of function hooks that runs inside Claude Code: a band above the prompt, a pane, a
+status line, a guard on tool calls, a game. Each one lives in `mods/<name>/`, outside `plugins/`
+because the lint fails a plugin with no skills, and has its own entry in the marketplace. Install
+one with:
+
+```
+/plugin install <name> --marketplace Casm101/deep-thought-skills
+```
 
 ### dt-memory is not in here
 
