@@ -71,6 +71,7 @@ commits; `dt-ship` is the only one that pushes or opens a PR.
 | **Browser** | `dt-test-login` gets a session, `dt-browser-run` drives the page and photographs what happened |
 | **Explaining** | `dt-explainer` animates a change or a concept as a self-contained page drawn by code |
 | **People** | `dt-who` maps a name to its Slack, GitHub and email identities, kept in the memory store |
+| **Circuits** | `dt-circuit` designs a circuit or wiring setup from a description, checks it, and draws a schematic or a pin-to-pin wiring diagram |
 | **Unattended** | `dt-auto-develop` runs the whole flow from a ticket and stops rather than guessing |
 | **Mods** | `dt-mod-creator` builds a Claude Code mod in `mods/`, shows it running, then ships and installs it |
 | **The suite itself** | `dt-skill-creator` (new skills), `dt-auto-improve-skill` (fold a lesson back in) |

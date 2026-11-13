@@ -62,6 +62,7 @@ STANDALONE
   dt-artifact-export  turn an artifact into one HTML file that opens with no network.
   dt-explainer        animate a change, an article or a concept as a page drawn by code.
   dt-who              a name in a prompt becomes a Slack id, a GitHub handle and a team.
+  dt-circuit          a described circuit or wiring setup becomes a checked drawing.
   dt-mod-creator      build a Claude Code mod, show it running live, ship and install it.
   dt-skill-creator builds a new dt skill. A person invokes it, never an agent.
   dt-ask-deepthought   this one.
@@ -108,6 +109,7 @@ worth it when you want just that piece.
 | `dt-artifact-export` | An artifact needs sending to somebody who cannot open the link, or keeping as a file | An artifact URL or title, and it must be one the user owns | One HTML file in Downloads with every font, script and image folded in, proved by loading it |
 | `dt-explainer` | A change or an idea is easier shown moving than described | Nothing for the current branch, or a URL, path or concept | A self contained HTML page with a scrubbable animation and captions, verified by reading a still of every scene. MP4 on request |
 | `dt-who` | A request names somebody and needs their identifier, or you want to know who they are | A name, alias, handle, email or Slack id | Their Slack id, GitHub handle, email, team and areas, from the directory. Looks up and records anyone new |
+| `dt-circuit` | Something needs wiring up, or a circuit needs designing, from a description | What it should do, and any parts, supply or pins already known | A checked connection list, a schematic or a pin-to-pin wiring diagram drawn from it, a table to wire from, and every assumption it made |
 | `dt-mod-creator` | The user wants something running inside Claude Code itself, a band above the prompt, a pane, a status line, a guard on tool calls, a slash command or a game | What the mod should do, in a sentence | The mod built under `mods/`, proved on the terminal and desktop, seen running live, then committed to `main` and installed once the user says it looks good |
 | `dt-skill-creator` | The user wants a new dt skill built | An idea for one | The skill installed, wired into this router, and printed for review |
 
@@ -184,14 +186,18 @@ at once.
    in the memory store before any network call, looks up anyone new in Slack and in local commit
    history, and records them. Reach for it whenever a request mentions a person and needs their
    Slack id or GitHub handle to act.
-26. **Is the deliverable words rather than code?** `dt-unslop`, on its own.
-27. **Is a change written and cluttered with comments?** `dt-unslop-code`. `dt-implement` already
+26. **Does a circuit or a wiring setup need designing or drawing?** `dt-circuit`. It writes the
+   design as a connection list first, interviews with `dt-grilling` for what the description
+   leaves open, checks it for shorts and mismatched voltages, and draws it from that list.
+   Anything at mains voltage is drawn and marked, never reported as checked.
+27. **Is the deliverable words rather than code?** `dt-unslop`, on its own.
+28. **Is a change written and cluttered with comments?** `dt-unslop-code`. `dt-implement` already
     runs it, so reach for it separately only when the code was written outside that flow.
-28. **Does the user want a new dt skill?** `dt-skill-creator`. Only a person can invoke it, so say
+29. **Does the user want a new dt skill?** `dt-skill-creator`. Only a person can invoke it, so say
     that if an agent is the one asking.
-29. **Did a run just show a skill should have known something?** `dt-auto-improve-skill`. Most runs
+30. **Did a run just show a skill should have known something?** `dt-auto-improve-skill`. Most runs
    teach nothing, and saying so is the right answer.
-30. **None of the above.** Say so. See below.
+31. **None of the above.** Say so. See below.
 
 Two signals beat the list. If the user named a skill, they get that skill. If a phase inside a skill
 already running says to call another, that instruction wins over anything here.
